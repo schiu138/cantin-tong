@@ -1,0 +1,958 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>餐厅通 Cāntīng Tōng</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --red: #C0392B; --red-dark: #922B21; --red-light: #F1948A;
+    --gold: #D4A843; --gold-light: #F9E4A0;
+    --cream: #FAF6EF; --ink: #1A1008; --ink-mid: #4A3728; --ink-light: #8B6E5A;
+    --card-bg: #FFFDF8; --border: rgba(212,168,67,0.25);
+    --shadow: 0 4px 24px rgba(26,16,8,0.10); --shadow-hover: 0 8px 40px rgba(26,16,8,0.18);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--ink); min-height: 100vh; }
+
+  /* HEADER */
+  header {
+    background: var(--red-dark);
+    background-image: repeating-linear-gradient(45deg,transparent,transparent 20px,rgba(255,255,255,0.03) 20px,rgba(255,255,255,0.03) 40px);
+    padding: 1.2rem 2rem; display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 3px solid var(--gold); position: sticky; top: 0; z-index: 100;
+    box-shadow: 0 2px 20px rgba(0,0,0,0.3);
+  }
+  .header-title { display: flex; flex-direction: column; }
+  .header-chinese { font-family: 'Noto Serif SC', serif; font-size: 1.9rem; color: var(--gold); line-height: 1; letter-spacing: 4px; }
+  .header-pinyin { font-size: 0.7rem; color: rgba(255,255,255,0.55); letter-spacing: 2px; margin-top: 2px; }
+  .header-right { display: flex; flex-direction: column; align-items: flex-end; gap: 0.4rem; }
+
+  /* RESTAURANT DROPDOWN */
+  .rest-selector { display: flex; align-items: center; gap: 0.5rem; }
+  .rest-selector label { font-size: 0.72rem; color: rgba(255,255,255,0.55); letter-spacing: 1px; text-transform: uppercase; white-space: nowrap; }
+  .rest-dropdown {
+    padding: 0.4rem 2rem 0.4rem 0.8rem;
+    background: rgba(255,255,255,0.12);
+    border: 1.5px solid var(--gold);
+    border-radius: 8px;
+    color: var(--gold-light);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23D4A843' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.6rem center;
+    background-size: 10px;
+    min-width: 170px;
+    transition: border-color 0.2s;
+  }
+  .rest-dropdown:hover { border-color: var(--gold-light); }
+  .rest-dropdown option { background: var(--ink); color: white; }
+
+  /* NAV TABS */
+  .nav-tabs { display: flex; background: var(--ink); border-bottom: 2px solid var(--gold); overflow-x: auto; scrollbar-width: none; }
+  .nav-tabs::-webkit-scrollbar { display: none; }
+  .tab-btn {
+    flex: 1; min-width: 110px; padding: 0.85rem 0.8rem;
+    background: transparent; border: none; color: rgba(255,255,255,0.5);
+    font-family: 'DM Sans', sans-serif; font-size: 0.82rem; font-weight: 500;
+    cursor: pointer; transition: all 0.2s; white-space: nowrap;
+    border-bottom: 3px solid transparent; margin-bottom: -2px;
+  }
+  .tab-btn:hover { color: var(--gold-light); background: rgba(255,255,255,0.05); }
+  .tab-btn.active { color: var(--gold); border-bottom-color: var(--gold); background: rgba(212,168,67,0.08); }
+  .tab-btn .tab-icon { font-size: 1rem; display: block; margin-bottom: 2px; }
+
+  main { max-width: 900px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  .section-header { text-align: center; margin-bottom: 1.5rem; }
+  .section-header h2 { font-family: 'Playfair Display', serif; font-size: 1.7rem; color: var(--red-dark); }
+  .section-header p { color: var(--ink-light); font-size: 0.88rem; margin-top: 0.4rem; }
+
+  /* RESTAURANT TYPE BANNER */
+  .rest-banner {
+    display: flex; align-items: center; gap: 0.8rem;
+    background: linear-gradient(135deg, var(--red-dark), #7B241C);
+    border-radius: 12px; padding: 0.8rem 1.2rem; margin-bottom: 1.2rem;
+    border: 1px solid rgba(212,168,67,0.3);
+  }
+  .rest-banner .rb-icon { font-size: 1.6rem; }
+  .rest-banner .rb-text { flex: 1; }
+  .rest-banner .rb-name { font-family: 'Noto Serif SC', serif; font-size: 1rem; color: var(--gold); }
+  .rest-banner .rb-desc { font-size: 0.75rem; color: rgba(255,255,255,0.6); margin-top: 2px; }
+  .rest-banner .rb-count { font-size: 0.75rem; color: rgba(255,255,255,0.45); white-space: nowrap; }
+
+  /* CATEGORY PILLS */
+  .category-bar { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 1.2rem; }
+  .cat-pill {
+    padding: 0.35rem 0.9rem; border-radius: 999px; border: 1.5px solid var(--border);
+    background: var(--card-bg); font-size: 0.78rem; cursor: pointer; transition: all 0.2s;
+    color: var(--ink-mid); font-weight: 500;
+  }
+  .cat-pill:hover, .cat-pill.active { background: var(--red); color: white; border-color: var(--red); }
+
+  /* PHRASE CARDS */
+  .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 0.9rem; }
+  .phrase-card {
+    background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px;
+    padding: 1rem 1.1rem; box-shadow: var(--shadow); transition: all 0.2s; position: relative;
+  }
+  .phrase-card:hover { box-shadow: var(--shadow-hover); transform: translateY(-2px); border-color: var(--gold); }
+  .phrase-card .chinese { font-family: 'Noto Serif SC', serif; font-size: 1.45rem; color: var(--ink); line-height: 1.3; }
+  .phrase-card .pinyin { font-size: 0.78rem; color: var(--red); margin-top: 3px; font-style: italic; }
+  .phrase-card .english { font-size: 0.82rem; color: var(--ink-mid); margin-top: 5px; line-height: 1.4; }
+  .phrase-card .rest-tag {
+    display: inline-block; margin-top: 6px;
+    padding: 0.15rem 0.5rem; border-radius: 999px;
+    font-size: 0.65rem; font-weight: 600; letter-spacing: 0.3px;
+    background: var(--gold-light); color: var(--ink-mid); border: 1px solid rgba(212,168,67,0.4);
+  }
+
+  .speak-btn {
+    position: absolute; top: 0.7rem; right: 0.7rem;
+    width: 30px; height: 30px; border-radius: 50%;
+    border: 1.5px solid var(--border); background: var(--cream);
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    font-size: 0.85rem; transition: all 0.2s; color: var(--ink-mid);
+  }
+  .speak-btn:hover { background: var(--red); color: white; border-color: var(--red); transform: scale(1.1); }
+  .speak-btn.speaking { background: var(--gold); color: white; border-color: var(--gold); animation: pulse 0.6s infinite alternate; }
+  @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.15); } }
+
+  /* FLASHCARD */
+  .flashcard-container { display: flex; flex-direction: column; align-items: center; gap: 1.2rem; }
+  .flashcard-wrap { width: 100%; max-width: 460px; perspective: 1000px; cursor: pointer; }
+  .flashcard { width: 100%; height: 220px; position: relative; transform-style: preserve-3d; transition: transform 0.5s cubic-bezier(0.175,0.885,0.32,1.275); }
+  .flashcard.flipped { transform: rotateY(180deg); }
+  .card-face { position: absolute; inset: 0; backface-visibility: hidden; border-radius: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 2rem; text-align: center; box-shadow: var(--shadow-hover); }
+  .card-front { background: linear-gradient(135deg, var(--red-dark), var(--red)); border: 2px solid var(--gold); }
+  .card-back { background: linear-gradient(135deg, var(--ink), var(--ink-mid)); transform: rotateY(180deg); border: 2px solid var(--gold); }
+  .card-front .big-chinese { font-family: 'Noto Serif SC', serif; font-size: 2.8rem; color: white; text-shadow: 0 2px 8px rgba(0,0,0,0.3); }
+  .card-front .hint { font-size: 0.72rem; color: rgba(255,255,255,0.45); margin-top: 1rem; letter-spacing: 1px; }
+  .card-back .back-pinyin { font-size: 1rem; color: var(--gold); font-style: italic; margin-bottom: 0.4rem; }
+  .card-back .back-english { font-size: 1.1rem; color: white; font-weight: 500; line-height: 1.4; }
+  .card-back .back-category { font-size: 0.65rem; color: rgba(255,255,255,0.35); margin-top: 0.8rem; letter-spacing: 2px; text-transform: uppercase; }
+  .flashcard-controls { display: flex; gap: 0.8rem; align-items: center; }
+  .fc-btn { padding: 0.65rem 1.5rem; border-radius: 999px; border: none; font-family: 'DM Sans', sans-serif; font-size: 0.88rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+  .fc-btn.primary { background: var(--red); color: white; }
+  .fc-btn.primary:hover { background: var(--red-dark); }
+  .fc-btn.secondary { background: transparent; color: var(--ink-mid); border: 1.5px solid var(--border); }
+  .fc-btn.secondary:hover { border-color: var(--ink-mid); }
+  .fc-btn.gold { background: var(--gold); color: var(--ink); }
+  .fc-progress { font-size: 0.78rem; color: var(--ink-light); }
+  .score-row { display: flex; gap: 2rem; font-size: 0.82rem; color: var(--ink-mid); }
+  .score-row span { font-weight: 700; }
+  .score-row .good { color: #27AE60; }
+  .score-row .bad { color: var(--red); }
+
+  /* ROLEPLAY */
+  .scenario-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 0.8rem; margin-bottom: 1.5rem; }
+  .scenario-card { background: var(--card-bg); border: 1.5px solid var(--border); border-radius: 12px; padding: 1rem; cursor: pointer; text-align: center; transition: all 0.2s; box-shadow: var(--shadow); }
+  .scenario-card:hover, .scenario-card.active { border-color: var(--red); box-shadow: var(--shadow-hover); transform: translateY(-2px); }
+  .scenario-card.active { background: #FFF0EE; }
+  .scenario-card .s-icon { font-size: 1.8rem; margin-bottom: 0.4rem; }
+  .scenario-card .s-title { font-weight: 600; font-size: 0.85rem; color: var(--ink); }
+  .scenario-card .s-sub { font-size: 0.7rem; color: var(--ink-light); margin-top: 2px; }
+  .scenario-phrases { background: var(--card-bg); border: 1px solid var(--border); border-radius: 14px; padding: 1.3rem; box-shadow: var(--shadow); }
+  .scenario-phrases h3 { font-family: 'Playfair Display', serif; color: var(--red-dark); margin-bottom: 0.8rem; font-size: 1.1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+  .rp-phrase { display: flex; align-items: flex-start; gap: 0.7rem; padding: 0.7rem 0; border-bottom: 1px solid var(--border); }
+  .rp-phrase:last-child { border-bottom: none; }
+  .rp-text { flex: 1; }
+  .rp-chinese { font-family: 'Noto Serif SC', serif; font-size: 1.15rem; }
+  .rp-pinyin { font-size: 0.75rem; color: var(--red); font-style: italic; margin-top: 2px; }
+  .rp-english { font-size: 0.8rem; color: var(--ink-light); margin-top: 2px; }
+
+  /* ADD FORM */
+  .add-form { background: var(--card-bg); border: 1px solid var(--border); border-radius: 14px; padding: 1.8rem; box-shadow: var(--shadow); max-width: 600px; margin: 0 auto; }
+  .add-form h3 { font-family: 'Playfair Display', serif; color: var(--red-dark); margin-bottom: 1.1rem; font-size: 1.2rem; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 0; }
+  .form-group { display: flex; flex-direction: column; gap: 0.35rem; margin-bottom: 0.9rem; }
+  .form-group label { font-size: 0.75rem; font-weight: 600; color: var(--ink-mid); text-transform: uppercase; letter-spacing: 0.5px; }
+  .form-group input, .form-group select {
+    padding: 0.65rem 0.9rem; border: 1.5px solid var(--border); border-radius: 8px;
+    font-family: 'DM Sans', sans-serif; font-size: 0.88rem; background: white; color: var(--ink); outline: none; transition: border-color 0.2s;
+  }
+  .form-group input:focus, .form-group select:focus { border-color: var(--red); }
+  .form-group .hint-text { font-size: 0.7rem; color: var(--ink-light); }
+  .submit-btn { width: 100%; padding: 0.85rem; background: var(--red); color: white; border: none; border-radius: 10px; font-family: 'DM Sans', sans-serif; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: all 0.2s; margin-top: 0.3rem; }
+  .submit-btn:hover { background: var(--red-dark); }
+
+  .custom-items-list { margin-top: 1.5rem; }
+  .custom-items-list h3 { font-family: 'Playfair Display', serif; color: var(--red-dark); margin-bottom: 0.8rem; font-size: 1.1rem; }
+  .custom-item { display: flex; align-items: center; gap: 0.8rem; padding: 0.75rem 1rem; background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 0.5rem; }
+  .custom-item-text { flex: 1; }
+  .custom-item .ci-chinese { font-family: 'Noto Serif SC', serif; font-size: 1.05rem; }
+  .custom-item .ci-pinyin { font-size: 0.72rem; color: var(--red); font-style: italic; }
+  .custom-item .ci-english { font-size: 0.75rem; color: var(--ink-light); }
+  .delete-btn { background: none; border: none; cursor: pointer; color: var(--ink-light); font-size: 1rem; padding: 0.3rem; border-radius: 50%; transition: color 0.2s; }
+  .delete-btn:hover { color: var(--red); }
+
+  .tips-box { background: var(--gold-light); border: 1px solid var(--gold); border-radius: 10px; padding: 0.9rem 1.1rem; margin-bottom: 1.3rem; font-size: 0.83rem; color: var(--ink-mid); line-height: 1.6; }
+  .tips-box strong { color: var(--ink); }
+
+  .toast { position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--ink); color: white; padding: 0.75rem 1.4rem; border-radius: 999px; font-size: 0.88rem; z-index: 999; transition: transform 0.3s; box-shadow: var(--shadow-hover); border: 1px solid var(--gold); }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  .empty-state { text-align: center; padding: 2.5rem; color: var(--ink-light); }
+  .empty-state .es-icon { font-size: 2.5rem; margin-bottom: 0.8rem; }
+  .empty-state p { font-size: 0.88rem; }
+
+  .search-bar { width: 100%; padding: 0.75rem 1.1rem; border: 1.5px solid var(--border); border-radius: 999px; font-family: 'DM Sans', sans-serif; font-size: 0.88rem; background: white; color: var(--ink); outline: none; margin-bottom: 1rem; transition: border-color 0.2s; }
+  .search-bar:focus { border-color: var(--red); }
+
+  @media (max-width: 600px) {
+    main { padding: 1rem 0.9rem; }
+    .form-row { grid-template-columns: 1fr; }
+    header { padding: 1rem; }
+    .header-chinese { font-size: 1.4rem; }
+    .rest-dropdown { min-width: 140px; font-size: 0.75rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-title">
+    <span class="header-chinese">餐厅通</span>
+    <span class="header-pinyin">CĀNTĪNG TŌNG · RESTAURANT COMMUNICATOR</span>
+  </div>
+  <div class="header-right">
+    <div class="rest-selector">
+      <label>🏮 Restaurant</label>
+      <select class="rest-dropdown" id="rest-dropdown" onchange="onRestaurantChange(this.value)">
+        <option value="All">All Restaurants</option>
+        <option value="Shanghai / XLB">🥟 Shanghai / XLB</option>
+        <option value="Dim Sum">🍡 Dim Sum</option>
+        <option value="Taiwanese">🧋 Taiwanese</option>
+        <option value="Sichuan Spicy">🌶️ Sichuan Spicy</option>
+        <option value="Hot Pot">🍲 Hot Pot</option>
+        <option value="Boba / Tea Shop">🧋 Boba / Tea Shop</option>
+        <option value="General">💬 General Phrases</option>
+      </select>
+    </div>
+  </div>
+</header>
+
+<div class="nav-tabs">
+  <button class="tab-btn active" onclick="showTab('pronounce', this)"><span class="tab-icon">📖</span>Phrases</button>
+  <button class="tab-btn" onclick="showTab('flashcard', this)"><span class="tab-icon">🃏</span>Flashcards</button>
+  <button class="tab-btn" onclick="showTab('roleplay', this)"><span class="tab-icon">🎭</span>Roleplay</button>
+  <button class="tab-btn" onclick="showTab('add', this)"><span class="tab-icon">➕</span>Add Items</button>
+</div>
+
+<main>
+
+  <!-- PHRASES TAB -->
+  <div id="tab-pronounce" class="tab-content active">
+    <div class="section-header">
+      <h2>All Phrases & Terms</h2>
+      <p>Tap 🔊 to hear any phrase spoken aloud in Mandarin</p>
+    </div>
+    <div id="rest-banner-pronounce"></div>
+    <input type="text" class="search-bar" id="search-input" placeholder="🔍  Search in English or Chinese..." oninput="filterCards(this.value)" />
+    <div class="category-bar" id="cat-bar"></div>
+    <div class="cards-grid" id="cards-grid"></div>
+  </div>
+
+  <!-- FLASHCARD TAB -->
+  <div id="tab-flashcard" class="tab-content">
+    <div class="section-header">
+      <h2>Flashcard Drill</h2>
+      <p>See the Chinese — flip to reveal pinyin & meaning</p>
+    </div>
+    <div id="rest-banner-flashcard"></div>
+    <div class="category-bar" id="fc-cat-bar"></div>
+    <div class="flashcard-container">
+      <div class="fc-progress" id="fc-progress">Card 1 of 1</div>
+      <div class="score-row">
+        <div>✅ Got it: <span class="good" id="fc-good">0</span></div>
+        <div>❌ Review: <span class="bad" id="fc-bad">0</span></div>
+      </div>
+      <div class="flashcard-wrap" onclick="flipCard()">
+        <div class="flashcard" id="flashcard">
+          <div class="card-face card-front">
+            <div class="big-chinese" id="fc-chinese">加载中</div>
+            <div class="hint">Tap to flip</div>
+          </div>
+          <div class="card-face card-back">
+            <div class="back-pinyin" id="fc-pinyin"></div>
+            <div class="back-english" id="fc-english"></div>
+            <div class="back-category" id="fc-category"></div>
+          </div>
+        </div>
+      </div>
+      <div class="flashcard-controls">
+        <button class="fc-btn secondary" onclick="markCard(false)">❌ Review Again</button>
+        <button class="fc-btn gold" onclick="speakCurrent()">🔊</button>
+        <button class="fc-btn primary" onclick="markCard(true)">✅ Got it!</button>
+      </div>
+      <div class="flashcard-controls">
+        <button class="fc-btn secondary" onclick="prevCard()">← Prev</button>
+        <button class="fc-btn secondary" onclick="resetDeck()">🔄 Restart</button>
+        <button class="fc-btn secondary" onclick="nextCard()">Next →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROLEPLAY TAB -->
+  <div id="tab-roleplay" class="tab-content">
+    <div class="section-header">
+      <h2>Restaurant Roleplay</h2>
+      <p>Choose a scenario — practice exactly what to say</p>
+    </div>
+    <div class="scenario-grid" id="scenario-grid"></div>
+    <div class="scenario-phrases" id="scenario-phrases">
+      <div class="empty-state"><div class="es-icon">🎭</div><p>Select a scenario above to see phrases</p></div>
+    </div>
+  </div>
+
+  <!-- ADD ITEMS TAB -->
+  <div id="tab-add" class="tab-content">
+    <div class="section-header">
+      <h2>Add Menu Items</h2>
+      <p>Expand your vocabulary from any restaurant</p>
+    </div>
+    <div class="tips-box">
+      <strong>💡 How to add new items:</strong><br>
+      1. Snap a photo of any Chinese menu<br>
+      2. Open <strong>Google Lens</strong> or <strong>Google Translate</strong> — it reads the characters for you<br>
+      3. Copy the Chinese + English + pinyin (Google Translate shows pinyin under the Chinese)<br>
+      4. Fill in the form → saved permanently in your browser 🎉
+    </div>
+    <div class="add-form">
+      <h3>➕ Add New Item</h3>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Chinese Characters *</label>
+          <input type="text" id="new-chinese" placeholder="e.g. 北京烤鸭" />
+        </div>
+        <div class="form-group">
+          <label>Pinyin *</label>
+          <input type="text" id="new-pinyin" placeholder="e.g. Běijīng kǎoyā" />
+          <span class="hint-text">Copy from Google Translate romanization</span>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>English Meaning *</label>
+        <input type="text" id="new-english" placeholder="e.g. Peking Roast Duck" />
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Category</label>
+          <select id="new-category">
+            <option value="Menu Items">Menu Items</option>
+            <option value="Ordering">Ordering</option>
+            <option value="Preferences">Preferences</option>
+            <option value="Drinks & Tea">Drinks & Tea</option>
+            <option value="Payment">Payment</option>
+            <option value="Problems">Problems</option>
+            <option value="Politeness">Politeness</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Restaurant Type</label>
+          <select id="new-resttype">
+            <option value="General">General Phrases</option>
+            <option value="Shanghai / XLB">Shanghai / XLB</option>
+            <option value="Dim Sum">Dim Sum</option>
+            <option value="Taiwanese">Taiwanese</option>
+            <option value="Sichuan Spicy">Sichuan Spicy</option>
+            <option value="Hot Pot">Hot Pot</option>
+            <option value="Boba / Tea Shop">Boba / Tea Shop</option>
+          </select>
+        </div>
+      </div>
+      <button class="submit-btn" onclick="addCustomItem()">Add to My Collection</button>
+    </div>
+    <div class="custom-items-list" id="custom-items-list"></div>
+  </div>
+
+</main>
+<div class="toast" id="toast"></div>
+
+<script>
+// =====================
+// RESTAURANT TYPES META
+// =====================
+const REST_TYPES = {
+  "All":            { icon: "🍽️", name: "All Restaurants", desc: "Showing all phrases and menu items", color: "#922B21" },
+  "Shanghai / XLB": { icon: "🥟", name: "上海 / 小笼包  Shanghai & XLB", desc: "Soup dumplings, pan-fried buns, noodles, wontons", color: "#8E44AD" },
+  "Dim Sum":        { icon: "🍡", name: "点心  Dim Sum", desc: "Har gow, siu mai, cheung fun, turnip cake and more", color: "#1A6B3A" },
+  "Taiwanese":      { icon: "🧋", name: "台湾料理  Taiwanese", desc: "Beef noodle soup, scallion pancake, braised pork rice", color: "#1A5276" },
+  "Sichuan Spicy":  { icon: "🌶️", name: "四川菜  Sichuan", desc: "Mapo tofu, spicy wontons, dan dan noodles, dry pot", color: "#C0392B" },
+  "Hot Pot":        { icon: "🍲", name: "火锅  Hot Pot", desc: "Broth selection, dipping sauces, meat & veggie orders", color: "#B7770D" },
+  "Boba / Tea Shop":{ icon: "🧋", name: "奶茶店  Boba & Tea", desc: "Milk tea, fruit tea, sweetness & ice levels", color: "#6C3483" },
+  "General":        { icon: "💬", name: "通用短语  General Phrases", desc: "Ordering, payment, preferences, compliments — any restaurant", color: "#2C3E50" },
+};
+
+// =====================
+// DATA
+// =====================
+const BUILT_IN = [
+  // ── SHANGHAI / XLB ──────────────────────────────
+  { chinese:"小笼包", pinyin:"Xiǎo lóng bāo", english:"Soup dumplings", category:"Menu Items", rest:"Shanghai / XLB" },
+  { chinese:"上海鲜肉小笼包", pinyin:"Shànghǎi xiān ròu xiǎo lóng bāo", english:"Shanghai pork soup dumplings", category:"Menu Items", rest:"Shanghai / XLB" },
+  { chinese:"香辣小笼包", pinyin:"Xiāng là xiǎo lóng bāo", english:"Spicy pork soup dumplings", category:"Menu Items", rest:"Shanghai / XLB" },
+  { chinese:"蟹粉小笼包", pinyin:"Xiè fěn xiǎo lóng bāo", english:"Crab & pork soup dumplings", category:"Menu Items", rest:"Shanghai / XLB" },
+  { chinese:"黑松露小笼包", pinyin:"Hēi sōnglù xiǎo lóng bāo", english:"Truffle soup dumplings", category:"Menu Items", rest:"Shanghai / XLB" },
+  { chinese:"手工蒸饺", pinyin:"Shǒugōng zhēng jiǎo", english:"Handcraft steamed dumplings", category:"Menu Items", rest:"Shanghai / XLB" },
+  { chinese:"鸡肉蒸饺", pinyin:"Jī ròu zhēng jiǎo", english:"Chicken dumplings", category:"Menu Items", rest:"Shanghai / XLB" },
+  { chinese:"盘菜鲜肉蒸饺", pinyin:"Pán cài xiān ròu zhēng jiǎo", english:"Pork & vegetable dumplings", category:"Menu Items", rest:"Shanghai / XLB" },
+  { chinese:"鲜虾猪肉蒸饺", pinyin:"Xiān xiā zhūròu zhēng jiǎo", english:"Shrimp & pork dumplings", category:"Menu Items", rest:"Shanghai / XLB" },
+  { chinese:"三鲜素饺", pinyin:"Sān xiān sù jiǎo", english:"Veggie dumplings", category:"Menu Items", rest:"Shanghai / XLB" },
+  { chinese:"上海生煎包", pinyin:"Shànghǎi shēng jiān bāo", english:"Pan fried juicy pork buns (6pcs)", category:"Menu Items", rest:"Shanghai / XLB" },
+  { chinese:"鲜肉台式锅贴", pinyin:"Xiān ròu táishì guō tiē", english:"Pork potstickers", category:"Menu Items", rest:"Shanghai / XLB" },
+  { chinese:"葱油饼", pinyin:"Cōng yóu bǐng", english:"Scallion pancake", category:"Menu Items", rest:"Shanghai / XLB" },
+  { chinese:"猪肉鲜虾馄饨汤", pinyin:"Zhūròu xiān xiā húntun tāng", english:"Pork & shrimp wonton soup", category:"Menu Items", rest:"Shanghai / XLB" },
+  { chinese:"猪肉鲜虾馄饨面", pinyin:"Zhūròu xiān xiā húntun miàn", english:"Pork & shrimp wonton noodle soup", category:"Menu Items", rest:"Shanghai / XLB" },
+  { chinese:"红烧牛肉面", pinyin:"Hóngshāo niúròu miàn", english:"Braised beef noodle soup", category:"Menu Items", rest:"Shanghai / XLB" },
+  { chinese:"上海粗炒面", pinyin:"Shànghǎi cū chǎo miàn", english:"Shanghai chow mein", category:"Menu Items", rest:"Shanghai / XLB" },
+  { chinese:"炸酱面", pinyin:"Zhá jiàng miàn", english:"Jajang noodle (no soup)", category:"Menu Items", rest:"Shanghai / XLB" },
+  { chinese:"蒜香面", pinyin:"Suàn xiāng miàn", english:"Garlic noodle", category:"Menu Items", rest:"Shanghai / XLB" },
+  { chinese:"黑松露安格斯牛肉炒饭", pinyin:"Hēi sōnglù ānggésī niúròu chǎo fàn", english:"Truffle Angus beef fried rice", category:"Menu Items", rest:"Shanghai / XLB" },
+  { chinese:"拍黄瓜", pinyin:"Pāi huáng guā", english:"Smashed cucumber salad", category:"Menu Items", rest:"Shanghai / XLB" },
+  { chinese:"皮蛋豆腐", pinyin:"Pídàn dòufu", english:"Tofu with century egg", category:"Menu Items", rest:"Shanghai / XLB" },
+  { chinese:"红油抄手", pinyin:"Hóng yóu chāo shǒu", english:"Spicy wonton in chili oil", category:"Menu Items", rest:"Shanghai / XLB" },
+  { chinese:"芝麻球", pinyin:"Zhīma qiú", english:"Sesame balls", category:"Menu Items", rest:"Shanghai / XLB" },
+  { chinese:"黄金小馒头", pinyin:"Huángjīn xiǎo mántou", english:"Fried golden buns w/ condensed milk", category:"Menu Items", rest:"Shanghai / XLB" },
+  { chinese:"蒜炒菠菜", pinyin:"Suàn chǎo bōcài", english:"Garlic spinach", category:"Menu Items", rest:"Shanghai / XLB" },
+  { chinese:"干煸四季豆", pinyin:"Gān biān sìjì dòu", english:"Dry fried green beans", category:"Menu Items", rest:"Shanghai / XLB" },
+  { chinese:"蒜炒西兰花", pinyin:"Suàn chǎo xīlánhuā", english:"Garlic broccoli", category:"Menu Items", rest:"Shanghai / XLB" },
+  { chinese:"蒜炒青菜", pinyin:"Suàn chǎo qīngcài", english:"Garlic bok choy", category:"Menu Items", rest:"Shanghai / XLB" },
+
+  // ── DIM SUM ────────────────────────────────────
+  { chinese:"点心", pinyin:"Diǎnxīn", english:"Dim Sum", category:"Menu Items", rest:"Dim Sum" },
+  { chinese:"虾饺", pinyin:"Xiā jiǎo", english:"Har gow – shrimp dumpling", category:"Menu Items", rest:"Dim Sum" },
+  { chinese:"烧卖", pinyin:"Shāomài", english:"Siu mai – pork & shrimp dumpling", category:"Menu Items", rest:"Dim Sum" },
+  { chinese:"叉烧包", pinyin:"Chāshāo bāo", english:"BBQ pork bun (steamed)", category:"Menu Items", rest:"Dim Sum" },
+  { chinese:"蛋挞", pinyin:"Dàn tǎ", english:"Egg tart", category:"Menu Items", rest:"Dim Sum" },
+  { chinese:"肠粉", pinyin:"Cháng fěn", english:"Cheung fun – rice noodle roll", category:"Menu Items", rest:"Dim Sum" },
+  { chinese:"萝卜糕", pinyin:"Luóbo gāo", english:"Turnip / radish cake", category:"Menu Items", rest:"Dim Sum" },
+  { chinese:"凤爪", pinyin:"Fèng zhuǎ", english:"Chicken feet in black bean sauce", category:"Menu Items", rest:"Dim Sum" },
+  { chinese:"排骨", pinyin:"Páigǔ", english:"Steamed spare ribs", category:"Menu Items", rest:"Dim Sum" },
+  { chinese:"糯米鸡", pinyin:"Nuòmǐ jī", english:"Sticky rice in lotus leaf", category:"Menu Items", rest:"Dim Sum" },
+  { chinese:"马来糕", pinyin:"Mǎlái gāo", english:"Malaysian steamed sponge cake", category:"Menu Items", rest:"Dim Sum" },
+  { chinese:"流沙包", pinyin:"Liúshā bāo", english:"Molten salted egg custard bun", category:"Menu Items", rest:"Dim Sum" },
+  { chinese:"腐皮卷", pinyin:"Fǔpí juǎn", english:"Bean curd skin roll", category:"Menu Items", rest:"Dim Sum" },
+  { chinese:"推车", pinyin:"Tuī chē", english:"Dim sum cart", category:"Ordering", rest:"Dim Sum" },
+  { chinese:"这个", pinyin:"Zhè gè", english:"This one! (pointing at cart)", category:"Ordering", rest:"Dim Sum" },
+  { chinese:"一笼", pinyin:"Yī lóng", english:"One steamer basket", category:"Ordering", rest:"Dim Sum" },
+  { chinese:"两笼", pinyin:"Liǎng lóng", english:"Two steamer baskets", category:"Ordering", rest:"Dim Sum" },
+
+  // ── TAIWANESE ──────────────────────────────────
+  { chinese:"台湾料理", pinyin:"Táiwān liàolǐ", english:"Taiwanese cuisine", category:"Menu Items", rest:"Taiwanese" },
+  { chinese:"卤肉饭", pinyin:"Lǔ ròu fàn", english:"Braised pork rice (Taiwanese classic)", category:"Menu Items", rest:"Taiwanese" },
+  { chinese:"牛肉面", pinyin:"Niúròu miàn", english:"Beef noodle soup", category:"Menu Items", rest:"Taiwanese" },
+  { chinese:"蚵仔煎", pinyin:"Ézǎi jiān", english:"Oyster omelet", category:"Menu Items", rest:"Taiwanese" },
+  { chinese:"珍珠奶茶", pinyin:"Zhēnzhū nǎi chá", english:"Bubble milk tea (boba)", category:"Menu Items", rest:"Taiwanese" },
+  { chinese:"臭豆腐", pinyin:"Chòu dòufu", english:"Stinky tofu", category:"Menu Items", rest:"Taiwanese" },
+  { chinese:"大肠包小肠", pinyin:"Dà cháng bāo xiǎo cháng", english:"Pork sausage in sticky rice sausage", category:"Menu Items", rest:"Taiwanese" },
+  { chinese:"盐酥鸡", pinyin:"Yán sū jī", english:"Popcorn chicken (Taiwanese style)", category:"Menu Items", rest:"Taiwanese" },
+  { chinese:"三杯鸡", pinyin:"Sān bēi jī", english:"Three cup chicken", category:"Menu Items", rest:"Taiwanese" },
+  { chinese:"蒜泥白肉", pinyin:"Suàn ní bái ròu", english:"Garlic pork belly slices", category:"Menu Items", rest:"Taiwanese" },
+  { chinese:"台湾香肠", pinyin:"Táiwān xiāngcháng", english:"Taiwanese sausage", category:"Menu Items", rest:"Taiwanese" },
+  { chinese:"地瓜粥", pinyin:"Dìguā zhōu", english:"Sweet potato congee", category:"Menu Items", rest:"Taiwanese" },
+  { chinese:"冬瓜茶", pinyin:"Dōngguā chá", english:"Winter melon tea", category:"Drinks & Tea", rest:"Taiwanese" },
+  { chinese:"仙草冻", pinyin:"Xiāncǎo dòng", english:"Grass jelly", category:"Menu Items", rest:"Taiwanese" },
+
+  // ── SICHUAN SPICY ──────────────────────────────
+  { chinese:"四川菜", pinyin:"Sìchuān cài", english:"Sichuan cuisine", category:"Menu Items", rest:"Sichuan Spicy" },
+  { chinese:"麻婆豆腐", pinyin:"Má pó dòufu", english:"Mapo tofu (spicy & numbing)", category:"Menu Items", rest:"Sichuan Spicy" },
+  { chinese:"水煮牛肉", pinyin:"Shuǐ zhǔ niúròu", english:"Water-boiled spicy beef", category:"Menu Items", rest:"Sichuan Spicy" },
+  { chinese:"夫妻肺片", pinyin:"Fūqī fèi piàn", english:"Husband & wife beef slices (cold spicy)", category:"Menu Items", rest:"Sichuan Spicy" },
+  { chinese:"担担面", pinyin:"Dàndàn miàn", english:"Dan dan noodles", category:"Menu Items", rest:"Sichuan Spicy" },
+  { chinese:"麻辣烫", pinyin:"Málà tàng", english:"Mala hot soup skewers", category:"Menu Items", rest:"Sichuan Spicy" },
+  { chinese:"干锅", pinyin:"Gān guō", english:"Dry pot (spicy stir-fry pot)", category:"Menu Items", rest:"Sichuan Spicy" },
+  { chinese:"钵钵鸡", pinyin:"Bō bō jī", english:"Sichuan cold spicy chicken skewers", category:"Menu Items", rest:"Sichuan Spicy" },
+  { chinese:"宫保鸡丁", pinyin:"Gōngbǎo jīdīng", english:"Kung pao chicken", category:"Menu Items", rest:"Sichuan Spicy" },
+  { chinese:"回锅肉", pinyin:"Huí guō ròu", english:"Twice-cooked pork belly", category:"Menu Items", rest:"Sichuan Spicy" },
+  { chinese:"鱼香肉丝", pinyin:"Yúxiāng ròusī", english:"Fish-flavored shredded pork", category:"Menu Items", rest:"Sichuan Spicy" },
+  { chinese:"麻辣", pinyin:"Málà", english:"Spicy and numbing (Sichuan flavor)", category:"Preferences", rest:"Sichuan Spicy" },
+  { chinese:"不要花椒", pinyin:"Bù yào huājiāo", english:"No Sichuan peppercorns", category:"Preferences", rest:"Sichuan Spicy" },
+  { chinese:"微麻微辣", pinyin:"Wēi má wēi là", english:"Mild numbing, mild spicy", category:"Preferences", rest:"Sichuan Spicy" },
+  { chinese:"加辣", pinyin:"Jiā là", english:"Make it spicier / add chili", category:"Preferences", rest:"Sichuan Spicy" },
+
+  // ── HOT POT ────────────────────────────────────
+  { chinese:"火锅", pinyin:"Huǒ guō", english:"Hot pot", category:"Menu Items", rest:"Hot Pot" },
+  { chinese:"清汤锅底", pinyin:"Qīng tāng guō dǐ", english:"Clear broth base", category:"Menu Items", rest:"Hot Pot" },
+  { chinese:"麻辣锅底", pinyin:"Málà guō dǐ", english:"Spicy mala broth base", category:"Menu Items", rest:"Hot Pot" },
+  { chinese:"鸳鸯锅", pinyin:"Yuānyāng guō", english:"Half-half pot (spicy + clear)", category:"Menu Items", rest:"Hot Pot" },
+  { chinese:"番茄锅底", pinyin:"Fānqié guō dǐ", english:"Tomato broth base", category:"Menu Items", rest:"Hot Pot" },
+  { chinese:"牛肉片", pinyin:"Niúròu piàn", english:"Beef slices", category:"Menu Items", rest:"Hot Pot" },
+  { chinese:"羊肉片", pinyin:"Yángròu piàn", english:"Lamb slices", category:"Menu Items", rest:"Hot Pot" },
+  { chinese:"虾滑", pinyin:"Xiā huá", english:"Shrimp paste balls", category:"Menu Items", rest:"Hot Pot" },
+  { chinese:"豆腐", pinyin:"Dòufu", english:"Tofu", category:"Menu Items", rest:"Hot Pot" },
+  { chinese:"金针菇", pinyin:"Jīn zhēn gū", english:"Enoki mushrooms", category:"Menu Items", rest:"Hot Pot" },
+  { chinese:"宽粉", pinyin:"Kuān fěn", english:"Wide glass noodles", category:"Menu Items", rest:"Hot Pot" },
+  { chinese:"蘸料", pinyin:"Zhàn liào", english:"Dipping sauce", category:"Menu Items", rest:"Hot Pot" },
+  { chinese:"芝麻酱", pinyin:"Zhīma jiàng", english:"Sesame paste dipping sauce", category:"Menu Items", rest:"Hot Pot" },
+  { chinese:"沙茶酱", pinyin:"Shāchá jiàng", english:"Shacha (BBQ) sauce", category:"Menu Items", rest:"Hot Pot" },
+  { chinese:"可以加汤吗？", pinyin:"Kěyǐ jiā tāng ma?", english:"Can you add more broth?", category:"Ordering", rest:"Hot Pot" },
+  { chinese:"锅底怎么选？", pinyin:"Guō dǐ zěnme xuǎn?", english:"How do I choose a broth base?", category:"Ordering", rest:"Hot Pot" },
+  { chinese:"这个怎么吃？", pinyin:"Zhège zěnme chī?", english:"How do I eat this?", category:"Ordering", rest:"Hot Pot" },
+
+  // ── BOBA / TEA SHOP ───────────────────────────
+  { chinese:"奶茶店", pinyin:"Nǎi chá diàn", english:"Boba / milk tea shop", category:"Drinks & Tea", rest:"Boba / Tea Shop" },
+  { chinese:"珍珠奶茶", pinyin:"Zhēnzhū nǎi chá", english:"Bubble tea / boba milk tea", category:"Drinks & Tea", rest:"Boba / Tea Shop" },
+  { chinese:"波霸奶茶", pinyin:"Bōbà nǎi chá", english:"Boba milk tea (large tapioca)", category:"Drinks & Tea", rest:"Boba / Tea Shop" },
+  { chinese:"抹茶拿铁", pinyin:"Mǒchá ná tiě", english:"Matcha latte", category:"Drinks & Tea", rest:"Boba / Tea Shop" },
+  { chinese:"芋头奶茶", pinyin:"Yùtou nǎi chá", english:"Taro milk tea", category:"Drinks & Tea", rest:"Boba / Tea Shop" },
+  { chinese:"红豆奶茶", pinyin:"Hóng dòu nǎi chá", english:"Red bean milk tea", category:"Drinks & Tea", rest:"Boba / Tea Shop" },
+  { chinese:"百香果绿茶", pinyin:"Bǎixiāngguǒ lǜ chá", english:"Passionfruit green tea", category:"Drinks & Tea", rest:"Boba / Tea Shop" },
+  { chinese:"草莓果茶", pinyin:"Cǎoméi guǒ chá", english:"Strawberry fruit tea", category:"Drinks & Tea", rest:"Boba / Tea Shop" },
+  { chinese:"荔枝乌龙", pinyin:"Lìzhī wūlóng", english:"Lychee oolong tea", category:"Drinks & Tea", rest:"Boba / Tea Shop" },
+  { chinese:"仙草奶茶", pinyin:"Xiāncǎo nǎi chá", english:"Grass jelly milk tea", category:"Drinks & Tea", rest:"Boba / Tea Shop" },
+  { chinese:"椰果", pinyin:"Yē guǒ", english:"Coconut jelly (topping)", category:"Drinks & Tea", rest:"Boba / Tea Shop" },
+  { chinese:"布丁", pinyin:"Bùdīng", english:"Pudding (topping)", category:"Drinks & Tea", rest:"Boba / Tea Shop" },
+  { chinese:"少糖", pinyin:"Shǎo táng", english:"Less sugar (30% sweet)", category:"Preferences", rest:"Boba / Tea Shop" },
+  { chinese:"半糖", pinyin:"Bàn táng", english:"Half sugar (50% sweet)", category:"Preferences", rest:"Boba / Tea Shop" },
+  { chinese:"全糖", pinyin:"Quán táng", english:"Full sugar (100% sweet)", category:"Preferences", rest:"Boba / Tea Shop" },
+  { chinese:"无糖", pinyin:"Wú táng", english:"No sugar", category:"Preferences", rest:"Boba / Tea Shop" },
+  { chinese:"去冰", pinyin:"Qù bīng", english:"No ice", category:"Preferences", rest:"Boba / Tea Shop" },
+  { chinese:"少冰", pinyin:"Shǎo bīng", english:"Less ice", category:"Preferences", rest:"Boba / Tea Shop" },
+  { chinese:"正常冰", pinyin:"Zhèngcháng bīng", english:"Normal ice", category:"Preferences", rest:"Boba / Tea Shop" },
+  { chinese:"多冰", pinyin:"Duō bīng", english:"Extra ice", category:"Preferences", rest:"Boba / Tea Shop" },
+  { chinese:"热的", pinyin:"Rè de", english:"Hot", category:"Preferences", rest:"Boba / Tea Shop" },
+  { chinese:"甜度怎么选？", pinyin:"Tián dù zěnme xuǎn?", english:"How do I choose sweetness level?", category:"Ordering", rest:"Boba / Tea Shop" },
+
+  // ── GENERAL PHRASES ───────────────────────────
+  { chinese:"我要点菜", pinyin:"Wǒ yào diǎn cài", english:"I'd like to order", category:"Ordering", rest:"General" },
+  { chinese:"我要点…", pinyin:"Wǒ yào diǎn…", english:"I'd like to order…", category:"Ordering", rest:"General" },
+  { chinese:"一份…", pinyin:"Yī fèn…", english:"One order of…", category:"Ordering", rest:"General" },
+  { chinese:"两份…", pinyin:"Liǎng fèn…", english:"Two orders of…", category:"Ordering", rest:"General" },
+  { chinese:"服务员！", pinyin:"Fúwùyuán!", english:"Waiter / Waitress!", category:"Ordering", rest:"General" },
+  { chinese:"不好意思！", pinyin:"Bù hǎoyìsi!", english:"Excuse me! (polite way to get attention)", category:"Ordering", rest:"General" },
+  { chinese:"可以看一下菜单吗？", pinyin:"Kěyǐ kàn yīxià càidān ma?", english:"Can I see the menu?", category:"Ordering", rest:"General" },
+  { chinese:"你们有什么推荐？", pinyin:"Nǐmen yǒu shénme tuījiàn?", english:"What do you recommend?", category:"Ordering", rest:"General" },
+  { chinese:"好了，谢谢", pinyin:"Hǎo le, xièxiè", english:"That's all, thank you", category:"Ordering", rest:"General" },
+  { chinese:"还要…", pinyin:"Hái yào…", english:"And also… / I also want…", category:"Ordering", rest:"General" },
+  { chinese:"不要辣", pinyin:"Bù yào là", english:"No spice", category:"Preferences", rest:"General" },
+  { chinese:"微辣", pinyin:"Wēi là", english:"Mild spice", category:"Preferences", rest:"General" },
+  { chinese:"中辣", pinyin:"Zhōng là", english:"Medium spice", category:"Preferences", rest:"General" },
+  { chinese:"很辣", pinyin:"Hěn là", english:"Very spicy", category:"Preferences", rest:"General" },
+  { chinese:"不要葱", pinyin:"Bù yào cōng", english:"No green onion", category:"Preferences", rest:"General" },
+  { chinese:"不要香菜", pinyin:"Bù yào xiāngcài", english:"No cilantro", category:"Preferences", rest:"General" },
+  { chinese:"不要大蒜", pinyin:"Bù yào dàsuàn", english:"No garlic", category:"Preferences", rest:"General" },
+  { chinese:"少盐", pinyin:"Shǎo yán", english:"Less salt", category:"Preferences", rest:"General" },
+  { chinese:"少油", pinyin:"Shǎo yóu", english:"Less oil", category:"Preferences", rest:"General" },
+  { chinese:"我是素食者", pinyin:"Wǒ shì sùshí zhě", english:"I'm vegetarian", category:"Preferences", rest:"General" },
+  { chinese:"我对海鲜过敏", pinyin:"Wǒ duì hǎixiān guòmǐn", english:"I'm allergic to seafood", category:"Preferences", rest:"General" },
+  { chinese:"买单！", pinyin:"Mǎi dān!", english:"Check please!", category:"Payment", rest:"General" },
+  { chinese:"多少钱？", pinyin:"Duōshǎo qián?", english:"How much is it?", category:"Payment", rest:"General" },
+  { chinese:"我用信用卡付", pinyin:"Wǒ yòng xìnyòngkǎ fù", english:"I'll pay by credit card", category:"Payment", rest:"General" },
+  { chinese:"我用现金付", pinyin:"Wǒ yòng xiànjīn fù", english:"I'll pay with cash", category:"Payment", rest:"General" },
+  { chinese:"我有优惠券", pinyin:"Wǒ yǒu yōuhuì quàn", english:"I have a coupon", category:"Payment", rest:"General" },
+  { chinese:"可以分开付吗？", pinyin:"Kěyǐ fēnkāi fù ma?", english:"Can we pay separately?", category:"Payment", rest:"General" },
+  { chinese:"不用找了", pinyin:"Bù yòng zhǎo le", english:"Keep the change", category:"Payment", rest:"General" },
+  { chinese:"可以给我收据吗？", pinyin:"Kěyǐ gěi wǒ shōujù ma?", english:"Can I have the receipt?", category:"Payment", rest:"General" },
+  { chinese:"这个不是我点的", pinyin:"Zhège bù shì wǒ diǎn de", english:"This isn't what I ordered", category:"Problems", rest:"General" },
+  { chinese:"账单有问题", pinyin:"Zhàngdān yǒu wèntí", english:"There's a problem with the bill", category:"Problems", rest:"General" },
+  { chinese:"这道菜还没上", pinyin:"Zhè dào cài hái méi shàng", english:"This dish hasn't come yet", category:"Problems", rest:"General" },
+  { chinese:"这个太辣了", pinyin:"Zhège tài là le", english:"This is too spicy", category:"Problems", rest:"General" },
+  { chinese:"这个太咸了", pinyin:"Zhège tài xián le", english:"This is too salty", category:"Problems", rest:"General" },
+  { chinese:"可以换一下吗？", pinyin:"Kěyǐ huàn yīxià ma?", english:"Can you replace this?", category:"Problems", rest:"General" },
+  { chinese:"我等了很久了", pinyin:"Wǒ děng le hěn jiǔ le", english:"I've been waiting a very long time", category:"Problems", rest:"General" },
+  { chinese:"谢谢", pinyin:"Xièxiè", english:"Thank you", category:"Politeness", rest:"General" },
+  { chinese:"非常感谢", pinyin:"Fēicháng gǎnxiè", english:"Thank you very much", category:"Politeness", rest:"General" },
+  { chinese:"太好吃了！", pinyin:"Tài hǎochī le!", english:"This is so delicious!", category:"Politeness", rest:"General" },
+  { chinese:"好吃！", pinyin:"Hǎochī!", english:"Tasty! Yummy!", category:"Politeness", rest:"General" },
+  { chinese:"请问", pinyin:"Qǐngwèn", english:"Excuse me / May I ask…", category:"Politeness", rest:"General" },
+  { chinese:"对不起", pinyin:"Duìbuqǐ", english:"I'm sorry / Excuse me", category:"Politeness", rest:"General" },
+  { chinese:"再见", pinyin:"Zàijiàn", english:"Goodbye", category:"Politeness", rest:"General" },
+  { chinese:"热茶", pinyin:"Rè chá", english:"Hot tea", category:"Drinks & Tea", rest:"General" },
+  { chinese:"冰柠茶", pinyin:"Bīng níng chá", english:"Iced lemon tea", category:"Drinks & Tea", rest:"General" },
+  { chinese:"奶茶", pinyin:"Nǎi chá", english:"Milk tea", category:"Drinks & Tea", rest:"General" },
+  { chinese:"一杯水", pinyin:"Yī bēi shuǐ", english:"A glass of water", category:"Drinks & Tea", rest:"General" },
+  { chinese:"还有一杯冰水", pinyin:"Hái yǒu yī bēi bīng shuǐ", english:"And a glass of ice water", category:"Drinks & Tea", rest:"General" },
+  { chinese:"啤酒", pinyin:"Píjiǔ", english:"Beer", category:"Drinks & Tea", rest:"General" },
+];
+
+// =====================
+// ROLEPLAY SCENARIOS
+// =====================
+const SCENARIOS = [
+  { id:"arrive", icon:"🚪", title:"Arriving", sub:"Being seated", phrases:[
+    { chinese:"你好！两位", pinyin:"Nǐ hǎo! Liǎng wèi", english:"Hello! Table for two" },
+    { chinese:"三位，谢谢", pinyin:"Sān wèi, xièxiè", english:"Three people, thank you" },
+    { chinese:"可以看一下菜单吗？", pinyin:"Kěyǐ kàn yīxià càidān ma?", english:"Can I see the menu?" },
+    { chinese:"有预约", pinyin:"Yǒu yùyuē", english:"I have a reservation" },
+  ]},
+  { id:"order", icon:"📋", title:"Ordering", sub:"Placing your order", phrases:[
+    { chinese:"不好意思！", pinyin:"Bù hǎoyìsi!", english:"Excuse me! (to get waiter)" },
+    { chinese:"我要点菜", pinyin:"Wǒ yào diǎn cài", english:"I'd like to order" },
+    { chinese:"我要一份小笼包", pinyin:"Wǒ yào yī fèn xiǎo lóng bāo", english:"I'd like one order of soup dumplings" },
+    { chinese:"你们有什么推荐？", pinyin:"Nǐmen yǒu shénme tuījiàn?", english:"What do you recommend?" },
+    { chinese:"这个是什么？", pinyin:"Zhège shì shénme?", english:"What is this?" },
+    { chinese:"好了，谢谢", pinyin:"Hǎo le, xièxiè", english:"That's all, thank you" },
+  ]},
+  { id:"tea", icon:"🍵", title:"Ordering Tea", sub:"Types & preferences", phrases:[
+    { chinese:"有什么茶？", pinyin:"Yǒu shénme chá?", english:"What kinds of tea do you have?" },
+    { chinese:"我要一杯热茶", pinyin:"Wǒ yào yī bēi rè chá", english:"I'd like a cup of hot tea" },
+    { chinese:"绿茶", pinyin:"Lǜ chá", english:"Green tea" },
+    { chinese:"乌龙茶", pinyin:"Wūlóng chá", english:"Oolong tea" },
+    { chinese:"茉莉花茶", pinyin:"Mòlì huā chá", english:"Jasmine tea" },
+    { chinese:"冰的还是热的？", pinyin:"Bīng de háishì rè de?", english:"Iced or hot? (waiter asks you)" },
+    { chinese:"热的，谢谢", pinyin:"Rè de, xièxiè", english:"Hot please, thank you" },
+    { chinese:"冰的，谢谢", pinyin:"Bīng de, xièxiè", english:"Iced please, thank you" },
+  ]},
+  { id:"boba", icon:"🧋", title:"Ordering Boba", sub:"Sweetness & ice levels", phrases:[
+    { chinese:"半糖", pinyin:"Bàn táng", english:"Half sugar (50%)" },
+    { chinese:"少糖", pinyin:"Shǎo táng", english:"Less sugar (30%)" },
+    { chinese:"无糖", pinyin:"Wú táng", english:"No sugar" },
+    { chinese:"去冰", pinyin:"Qù bīng", english:"No ice" },
+    { chinese:"少冰", pinyin:"Shǎo bīng", english:"Less ice" },
+    { chinese:"正常冰", pinyin:"Zhèngcháng bīng", english:"Normal ice" },
+    { chinese:"加珍珠", pinyin:"Jiā zhēnzhū", english:"Add boba / tapioca" },
+    { chinese:"加布丁", pinyin:"Jiā bùdīng", english:"Add pudding topping" },
+  ]},
+  { id:"prefs", icon:"⚙️", title:"Preferences", sub:"Spice, dietary needs", phrases:[
+    { chinese:"不要辣，谢谢", pinyin:"Bù yào là, xièxiè", english:"No spice please" },
+    { chinese:"微辣可以", pinyin:"Wēi là kěyǐ", english:"Mild spice is okay" },
+    { chinese:"不要香菜", pinyin:"Bù yào xiāngcài", english:"No cilantro" },
+    { chinese:"不要葱", pinyin:"Bù yào cōng", english:"No green onion" },
+    { chinese:"少油少盐", pinyin:"Shǎo yóu shǎo yán", english:"Less oil and less salt" },
+    { chinese:"我是素食者", pinyin:"Wǒ shì sùshí zhě", english:"I'm vegetarian" },
+    { chinese:"我对海鲜过敏", pinyin:"Wǒ duì hǎixiān guòmǐn", english:"I'm allergic to seafood" },
+  ]},
+  { id:"hotpot", icon:"🍲", title:"Hot Pot", sub:"Broth & ingredients", phrases:[
+    { chinese:"鸳鸯锅", pinyin:"Yuānyāng guō", english:"Half-half pot (spicy + clear)" },
+    { chinese:"麻辣锅底", pinyin:"Málà guō dǐ", english:"Spicy mala broth" },
+    { chinese:"清汤锅底", pinyin:"Qīng tāng guō dǐ", english:"Clear mild broth" },
+    { chinese:"可以加汤吗？", pinyin:"Kěyǐ jiā tāng ma?", english:"Can you add more broth?" },
+    { chinese:"这个怎么吃？", pinyin:"Zhège zěnme chī?", english:"How do I eat this?" },
+    { chinese:"蘸料在哪里？", pinyin:"Zhàn liào zài nǎlǐ?", english:"Where is the dipping sauce?" },
+  ]},
+  { id:"problem", icon:"⚠️", title:"Problems", sub:"Wrong order, wait time", phrases:[
+    { chinese:"不好意思，这个不是我点的", pinyin:"Bù hǎoyìsi, zhège bù shì wǒ diǎn de", english:"Excuse me, this isn't what I ordered" },
+    { chinese:"我的菜还没上", pinyin:"Wǒ de cài hái méi shàng", english:"My food hasn't come yet" },
+    { chinese:"账单有问题", pinyin:"Zhàngdān yǒu wèntí", english:"There's a problem with the bill" },
+    { chinese:"这个太辣了", pinyin:"Zhège tài là le", english:"This is too spicy" },
+    { chinese:"可以换一下吗？", pinyin:"Kěyǐ huàn yīxià ma?", english:"Can you replace this?" },
+    { chinese:"我等了很久了", pinyin:"Wǒ děng le hěn jiǔ le", english:"I've been waiting a very long time" },
+  ]},
+  { id:"pay", icon:"💳", title:"Paying", sub:"Check, card, coupons", phrases:[
+    { chinese:"买单！", pinyin:"Mǎi dān!", english:"Check please!" },
+    { chinese:"多少钱？", pinyin:"Duōshǎo qián?", english:"How much is it?" },
+    { chinese:"我用信用卡付", pinyin:"Wǒ yòng xìnyòngkǎ fù", english:"I'll pay by credit card" },
+    { chinese:"我有优惠券", pinyin:"Wǒ yǒu yōuhuì quàn", english:"I have a coupon" },
+    { chinese:"可以分开付吗？", pinyin:"Kěyǐ fēnkāi fù ma?", english:"Can we pay separately?" },
+    { chinese:"不用找了", pinyin:"Bù yòng zhǎo le", english:"Keep the change" },
+    { chinese:"可以给我收据吗？", pinyin:"Kěyǐ gěi wǒ shōujù ma?", english:"Can I have the receipt?" },
+  ]},
+  { id:"praise", icon:"😋", title:"Compliments", sub:"Say it's delicious!", phrases:[
+    { chinese:"太好吃了！", pinyin:"Tài hǎochī le!", english:"This is so delicious!" },
+    { chinese:"好吃！", pinyin:"Hǎochī!", english:"Tasty! Yummy!" },
+    { chinese:"皮很薄", pinyin:"Pí hěn báo", english:"The skin is very thin (dumpling praise!)" },
+    { chinese:"汤很鲜", pinyin:"Tāng hěn xiān", english:"The soup is very fresh/rich" },
+    { chinese:"下次还来", pinyin:"Xià cì hái lái", english:"I'll come back next time" },
+  ]},
+];
+
+// =====================
+// STATE
+// =====================
+let currentRest = "All";
+let currentCategory = "All";
+let fcDeck = [], fcIndex = 0, fcGood = 0, fcBad = 0, fcFlipped = false, fcCategory = "All";
+
+function loadCustom() { try { return JSON.parse(localStorage.getItem("ct_custom2") || "[]"); } catch { return []; } }
+function saveCustom(items) { localStorage.setItem("ct_custom2", JSON.stringify(items)); }
+function getAllPhrases() { return [...BUILT_IN, ...loadCustom()]; }
+
+// =====================
+// SPEECH
+// =====================
+function speak(text, btn) {
+  if (!window.speechSynthesis) { showToast("Speech not supported"); return; }
+  window.speechSynthesis.cancel();
+  if (btn && btn.classList.contains("speaking")) { btn.classList.remove("speaking"); return; }
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = "zh-CN"; u.rate = 0.85; u.pitch = 1;
+  const voices = window.speechSynthesis.getVoices();
+  const zh = voices.find(v => v.lang.startsWith("zh"));
+  if (zh) u.voice = zh;
+  if (btn) {
+    document.querySelectorAll(".speak-btn.speaking").forEach(b => b.classList.remove("speaking"));
+    btn.classList.add("speaking");
+    u.onend = () => btn.classList.remove("speaking");
+    u.onerror = () => btn.classList.remove("speaking");
+  }
+  window.speechSynthesis.speak(u);
+}
+function speakCurrent() { if (fcDeck.length) speak(fcDeck[fcIndex].chinese); }
+
+// =====================
+// RESTAURANT FILTER
+// =====================
+function onRestaurantChange(val) {
+  currentRest = val;
+  currentCategory = "All";
+  renderBanner("rest-banner-pronounce");
+  renderBanner("rest-banner-flashcard");
+  buildCategoryBar("cat-bar", getFilteredPhrases(), "All", cat => { currentCategory = cat; renderCards(); });
+  buildCategoryBar("fc-cat-bar", getFilteredPhrases(), "All", cat => { fcCategory = cat; buildDeck(); });
+  renderCards();
+  if (fcDeck.length) buildDeck();
+}
+
+function getFilteredPhrases() {
+  const all = getAllPhrases();
+  if (currentRest === "All") return all;
+  return all.filter(p => (p.rest || "General") === currentRest);
+}
+
+function renderBanner(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  if (currentRest === "All") { el.innerHTML = ""; return; }
+  const r = REST_TYPES[currentRest];
+  const count = getFilteredPhrases().length;
+  el.innerHTML = `<div class="rest-banner">
+    <span class="rb-icon">${r.icon}</span>
+    <div class="rb-text">
+      <div class="rb-name">${r.name}</div>
+      <div class="rb-desc">${r.desc}</div>
+    </div>
+    <div class="rb-count">${count} phrases</div>
+  </div>`;
+}
+
+// =====================
+// TABS
+// =====================
+function showTab(name, btn) {
+  document.querySelectorAll(".tab-content").forEach(t => t.classList.remove("active"));
+  document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+  document.getElementById("tab-" + name).classList.add("active");
+  btn.classList.add("active");
+  if (name === "flashcard") initFlashcard();
+  if (name === "add") renderCustomList();
+}
+
+// =====================
+// CATEGORY BAR
+// =====================
+function buildCategoryBar(containerId, phrases, activeVal, onSelect) {
+  const bar = document.getElementById(containerId);
+  if (!bar) return;
+  const cats = ["All", ...new Set(phrases.map(p => p.category))];
+  bar.innerHTML = "";
+  cats.forEach(cat => {
+    const pill = document.createElement("button");
+    pill.className = "cat-pill" + (cat === activeVal ? " active" : "");
+    pill.textContent = cat;
+    pill.onclick = (e) => {
+      bar.querySelectorAll(".cat-pill").forEach(p => p.classList.remove("active"));
+      e.currentTarget.classList.add("active");
+      onSelect(cat);
+    };
+    bar.appendChild(pill);
+  });
+}
+
+// =====================
+// PHRASE BROWSE
+// =====================
+function renderCards(searchQ = "") {
+  searchQ = searchQ || (document.getElementById("search-input")?.value || "");
+  const phrases = getFilteredPhrases();
+  const grid = document.getElementById("cards-grid");
+  const filtered = phrases.filter(p => {
+    const matchCat = currentCategory === "All" || p.category === currentCategory;
+    const q = searchQ.toLowerCase();
+    const matchQ = !q || p.chinese.includes(q) || p.pinyin.toLowerCase().includes(q) || p.english.toLowerCase().includes(q);
+    return matchCat && matchQ;
+  });
+  if (filtered.length === 0) {
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="es-icon">🔍</div><p>No phrases found</p></div>`;
+    return;
+  }
+  grid.innerHTML = "";
+  filtered.forEach(p => {
+    const card = document.createElement("div");
+    card.className = "phrase-card";
+    const safeC = p.chinese.replace(/'/g, "\\'").replace(/"/g, "&quot;");
+    const showTag = currentRest === "All" && p.rest;
+    const rt = REST_TYPES[p.rest] || {};
+    card.innerHTML = `
+      <button class="speak-btn" onclick="speak('${safeC}', this)" title="Hear pronunciation">🔊</button>
+      <div class="chinese">${p.chinese}</div>
+      <div class="pinyin">${p.pinyin}</div>
+      <div class="english">${p.english}</div>
+      ${showTag ? `<span class="rest-tag">${rt.icon || ''} ${p.rest}</span>` : ''}
+      ${p.isCustom ? '<span class="rest-tag" style="margin-left:4px">⭐ Mine</span>' : ''}
+    `;
+    grid.appendChild(card);
+  });
+}
+
+function filterCards(q) { renderCards(q); }
+
+function initPronounceTab() {
+  const phrases = getFilteredPhrases();
+  buildCategoryBar("cat-bar", phrases, "All", cat => { currentCategory = cat; renderCards(); });
+  renderCards();
+}
+
+// =====================
+// FLASHCARD
+// =====================
+function initFlashcard() {
+  const phrases = getFilteredPhrases();
+  buildCategoryBar("fc-cat-bar", phrases, fcCategory, cat => { fcCategory = cat; buildDeck(); });
+  renderBanner("rest-banner-flashcard");
+  buildDeck();
+}
+
+function buildDeck() {
+  let src = getFilteredPhrases();
+  fcDeck = fcCategory === "All" ? [...src] : src.filter(p => p.category === fcCategory);
+  for (let i = fcDeck.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i+1)); [fcDeck[i],fcDeck[j]] = [fcDeck[j],fcDeck[i]]; }
+  fcIndex = 0; fcGood = 0; fcBad = 0;
+  document.getElementById("fc-good").textContent = 0;
+  document.getElementById("fc-bad").textContent = 0;
+  renderFlashcard();
+}
+
+function renderFlashcard() {
+  if (!fcDeck.length) return;
+  const p = fcDeck[fcIndex];
+  document.getElementById("flashcard").classList.remove("flipped");
+  fcFlipped = false;
+  document.getElementById("fc-chinese").textContent = p.chinese;
+  document.getElementById("fc-pinyin").textContent = p.pinyin;
+  document.getElementById("fc-english").textContent = p.english;
+  document.getElementById("fc-category").textContent = `${p.category} · ${p.rest || 'General'}`;
+  document.getElementById("fc-progress").textContent = `Card ${fcIndex + 1} of ${fcDeck.length}`;
+}
+
+function flipCard() {
+  fcFlipped = !fcFlipped;
+  document.getElementById("flashcard").classList.toggle("flipped", fcFlipped);
+  if (fcFlipped) speakCurrent();
+}
+
+function nextCard() { if (fcIndex < fcDeck.length - 1) { fcIndex++; renderFlashcard(); } else showToast("Last card! 🎉 Use Restart to shuffle again."); }
+function prevCard() { if (fcIndex > 0) { fcIndex--; renderFlashcard(); } }
+function markCard(good) {
+  if (good) { fcGood++; document.getElementById("fc-good").textContent = fcGood; }
+  else { fcBad++; document.getElementById("fc-bad").textContent = fcBad; }
+  if (fcIndex < fcDeck.length - 1) { fcIndex++; renderFlashcard(); }
+  else showToast(`Done! ✅ ${fcGood} got it · ❌ ${fcBad} to review`);
+}
+function resetDeck() { buildDeck(); }
+
+// =====================
+// ROLEPLAY
+// =====================
+function initRoleplay() {
+  const grid = document.getElementById("scenario-grid");
+  SCENARIOS.forEach(s => {
+    const card = document.createElement("div");
+    card.className = "scenario-card"; card.id = "sc-" + s.id;
+    card.innerHTML = `<div class="s-icon">${s.icon}</div><div class="s-title">${s.title}</div><div class="s-sub">${s.sub}</div>`;
+    card.onclick = () => showScenario(s.id);
+    grid.appendChild(card);
+  });
+}
+
+function showScenario(id) {
+  const s = SCENARIOS.find(x => x.id === id);
+  if (!s) return;
+  document.querySelectorAll(".scenario-card").forEach(c => c.classList.remove("active"));
+  document.getElementById("sc-" + id).classList.add("active");
+  const container = document.getElementById("scenario-phrases");
+  let html = `<h3>${s.icon} ${s.title} — ${s.sub}</h3>`;
+  s.phrases.forEach(p => {
+    const safeC = p.chinese.replace(/'/g,"\\'");
+    html += `<div class="rp-phrase">
+      <div class="rp-text">
+        <div class="rp-chinese">${p.chinese}</div>
+        <div class="rp-pinyin">${p.pinyin}</div>
+        <div class="rp-english">${p.english}</div>
+      </div>
+      <button class="speak-btn" style="position:static;flex-shrink:0" onclick="speak('${safeC}', this)">🔊</button>
+    </div>`;
+  });
+  container.innerHTML = html;
+}
+
+// =====================
+// ADD ITEMS
+// =====================
+function addCustomItem() {
+  const chinese = document.getElementById("new-chinese").value.trim();
+  const pinyin = document.getElementById("new-pinyin").value.trim();
+  const english = document.getElementById("new-english").value.trim();
+  const category = document.getElementById("new-category").value;
+  const rest = document.getElementById("new-resttype").value;
+  if (!chinese || !pinyin || !english) { showToast("Please fill in Chinese, Pinyin, and English"); return; }
+  const items = loadCustom();
+  items.push({ chinese, pinyin, english, category, rest, isCustom: true });
+  saveCustom(items);
+  document.getElementById("new-chinese").value = "";
+  document.getElementById("new-pinyin").value = "";
+  document.getElementById("new-english").value = "";
+  showToast("✅ Added: " + chinese);
+  renderCustomList();
+}
+
+function renderCustomList() {
+  const items = loadCustom();
+  const container = document.getElementById("custom-items-list");
+  if (!items.length) { container.innerHTML = ""; return; }
+  let html = `<h3>My Added Items (${items.length})</h3>`;
+  items.forEach((item, i) => {
+    const safeC = item.chinese.replace(/'/g,"\\'");
+    html += `<div class="custom-item">
+      <button class="speak-btn" style="position:static;flex-shrink:0" onclick="speak('${safeC}',this)">🔊</button>
+      <div class="custom-item-text">
+        <div class="ci-chinese">${item.chinese}</div>
+        <div class="ci-pinyin">${item.pinyin}</div>
+        <div class="ci-english">${item.english} · <em>${item.category}</em> · ${item.rest||'General'}</div>
+      </div>
+      <button class="delete-btn" onclick="deleteCustomItem(${i})" title="Delete">🗑️</button>
+    </div>`;
+  });
+  container.innerHTML = html;
+}
+
+function deleteCustomItem(i) {
+  const items = loadCustom();
+  const r = items.splice(i, 1);
+  saveCustom(items);
+  showToast("Removed: " + (r[0]?.chinese || "item"));
+  renderCustomList();
+}
+
+// =====================
+// TOAST
+// =====================
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById("toast");
+  t.textContent = msg; t.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove("show"), 3000);
+}
+
+// =====================
+// INIT
+// =====================
+window.speechSynthesis?.addEventListener?.("voiceschanged", () => {});
+document.addEventListener("DOMContentLoaded", () => {
+  initPronounceTab();
+  initRoleplay();
+});
+</script>
+</body>
+</html>
